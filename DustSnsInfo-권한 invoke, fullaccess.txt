@@ -1,0 +1,28 @@
+const request = require('request');
+const cheerio = require('cheerio');
+
+exports.handler = async (event) => {
+  const apiKey = '4e7552694161736b38374a72644c72';
+  const url = `http://openapi.seoul.go.kr:8088/${apiKey}/xml/lostArticleInfo/1/5/`;
+
+  return new Promise((resolve, reject) => {
+    request(url, function (error, response, body) {
+      if (error) {
+        reject(error);
+      } else {
+        const $ = cheerio.load(body, { xmlMode: true });
+        const lostArticles = $('row');
+        const newestDate = $(lostArticles[0]).find('REG_DATE').text();
+        const newestThing = $(lostArticles[0]).find('GET_THING').text();
+
+        console.log('습득 날짜:', newestDate);
+        console.log('습득 내용:', newestThing);
+
+        resolve({
+          body: newestDate,
+          body2: newestThing
+        });
+      }
+    });
+  });
+};
